@@ -1,0 +1,16 @@
+[project]
+name = "job-application-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "langchain-google-genai>=2.1.12",
+    "langgraph>=0.6.11",
+    "langsmith>=0.4.37",
+    "playwright>=1.60.0",
+    "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
+    "streamlit>=1.50.0",
+]
