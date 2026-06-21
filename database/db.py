@@ -59,8 +59,8 @@ def insert_jobs(jobs: List[Dict]):
 
     for job in jobs:
         # Use job_url as a simple unique ID generator
-        job_id = job.get("job_url", "").split("-")[-1] or str(hash(job.get("job_url", "")))
-
+        job_url = job.get("job_url") or ""
+        job_id = job_url.split("-")[-1] if job_url else str(hash(job.get("job_title", "") + job.get("company_name", "")))   
         try:
             cursor.execute("""
                 INSERT OR IGNORE INTO jobs (

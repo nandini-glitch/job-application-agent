@@ -4,17 +4,54 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
 
 from agent.state import AgentState
-from database.db import update_job_decision, update_application_status
+from database.db import update_job_decision, update_application_status, get_pending_jobs
 
 load_dotenv()
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     google_api_key=os.getenv("GOOGLE_API_KEY"),
     temperature=0.2,
 )
 
 #nodes
+# this first node func is the entry point to the graph
+def load_jobs_node(state: AgentState) -> AgentState:
+    """
+    Entry point of the graph. Loads pending jobs from SQLite
+    into state['jobs'], capped at a safe batch size to respect
+    free-tier API rate limits, and sets up loop-tracking fields.
+    """
+    MAX_JOBS_PER_RUN = 15  # stays safely under the 20/day free-tier quota
+
+    pending_jobs = get_pending_jobs()[:MAX_JOBS_PER_RUN]
+
+    jobs = []
+    for row in pending_jobs:
+        jobs.append({
+            "job_id": row["job_id"],
+            "job_url": row["job_url"],
+            "job_title": row["job_title"],
+            "company_name": row["company_name"],
+            "job_description": row["job_description"],
+            "experience_required": row["experience_required"],
+            "required_skills": [],
+            "match_score": None,
+            "match_reasoning": None,
+            "decision": None,
+            "application_status": "pending",
+            "error_message": None,
+            "timestamp": row["timestamp"],
+        })
+
+    state["jobs"] = jobs
+    state["total_jobs"] = len(jobs)
+    state["current_index"] = 0
+    state["is_done"] = len(jobs) == 0
+
+    print(f"Loaded {len(jobs)} pending jobs from database (capped at {MAX_JOBS_PER_RUN}/run).")
+
+    return state
 
 def analyze_job_node(state: AgentState) -> AgentState:
     """
