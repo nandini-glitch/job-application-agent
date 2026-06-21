@@ -7,9 +7,12 @@ wheels/
 *.egg-info
 
 # Virtual environments
-
-.env
 .venv/
-__pycache__/
-*.pyc
-.DS_Storejobs.db
+
+# Environment secrets
+.env
+
+# Local data / generated files
+jobs.db
+debug_screenshot.png
+.DS_Store
