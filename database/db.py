@@ -1,9 +1,10 @@
 import sqlite3
+import os
 from datetime import datetime
 from typing import List, Dict, Optional
 
 
-DB_PATH = "jobs.db"
+DB_PATH = os.getenv("DB_PATH", "jobs.db")
 
 
 def get_connection():
