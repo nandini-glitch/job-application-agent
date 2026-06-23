@@ -2,6 +2,51 @@ import sqlite3
 import os
 from datetime import datetime
 from typing import List, Dict, Optional
+import json
+
+def seed_from_json_if_empty(json_path: str = "seed_data.json"):
+    """
+    If the jobs table is empty (e.g., fresh container start on Render),
+    populate it from a committed JSON snapshot so the deployed demo
+    always has data to show.
+    """
+    existing = get_all_jobs()
+    if existing:
+        print(f"Database already has {len(existing)} jobs — skipping seed.")
+        return
+
+    if not os.path.exists(json_path):
+        print(f"No seed file found at {json_path} — starting with empty database.")
+        return
+
+    with open(json_path, "r") as f:
+        seed_jobs = json.load(f)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    for job in seed_jobs:
+        try:
+            cursor.execute("""
+                INSERT OR IGNORE INTO jobs (
+                    job_id, job_url, job_title, company_name,
+                    job_description, experience_required, location,
+                    match_score, match_reasoning, decision,
+                    application_status, timestamp
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                job.get("job_id"), job.get("job_url"), job.get("job_title"),
+                job.get("company_name"), job.get("job_description"),
+                job.get("experience_required"), job.get("location"),
+                job.get("match_score"), job.get("match_reasoning"), job.get("decision"),
+                job.get("application_status", "pending"), job.get("timestamp"),
+            ))
+        except Exception as e:
+            print(f"Error seeding job {job.get('job_title')}: {e}")
+
+    conn.commit()
+    conn.close()
+    print(f"Seeded database with {len(seed_jobs)} jobs from {json_path}.")
 
 
 DB_PATH = os.getenv("DB_PATH", "jobs.db")

@@ -13,6 +13,8 @@ from agent.graph import build_graph
 
 st.set_page_config(page_title="Job Application Agent", layout="wide")
 init_db()
+from database.db import seed_from_json_if_empty
+seed_from_json_if_empty()
 
 st.title("🤖 Autonomous Job Application Agent")
 st.caption("LangGraph + Gemini-powered agent that scrapes, analyzes, and decides on job applications")
@@ -25,8 +27,14 @@ with st.sidebar:
 
     #  Step 1: Scrape 
     st.subheader("1️⃣ Scrape Jobs")
-    search_query = st.text_input("Job search term", placeholder="e.g. AI ML Engineer fresher")
-    max_jobs = st.slider("Max jobs to scrape", 5, 50, 5)
+
+    IS_DEPLOYED = os.getenv("IS_DEPLOYED", "false").lower() == "true"
+
+    if IS_DEPLOYED:
+        st.info("🖥️ Live scraping requires a real browser and runs locally only (due to Naukri's anti-bot protection). The dashboard below shows jobs already scraped and analyzed. You can still upload your own resume and run the agent on these jobs!")
+    else:
+        search_query = st.text_input("Job search term", placeholder="e.g. AI ML Engineer fresher")
+        max_jobs = st.slider("Max jobs to scrape", 5, 50, 5)
 
     if st.button("🔍 Scrape Jobs", use_container_width=True):
         if not search_query.strip():
