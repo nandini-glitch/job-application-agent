@@ -20,6 +20,7 @@ def scrape_naukri_jobs(search_query: str, max_jobs: int = 40):
     Returns:
         A list of dictionaries, each representing one scraped job.
     """
+    print(f"DEBUG: scrape_naukri_jobs called with query='{search_query}'", flush=True)
 
     if not search_query or not search_query.strip():
         raise ValueError("search_query cannot be empty — please provide a job title/keyword to search.")
@@ -27,30 +28,38 @@ def scrape_naukri_jobs(search_query: str, max_jobs: int = 40):
     jobs = []
     slug = search_query.lower().strip().replace(" ", "-")
 
+    print("DEBUG: Entering sync_playwright context", flush=True)
     with sync_playwright() as p:
+        print("DEBUG: Playwright context started, launching browser...", flush=True)
         browser = p.chromium.launch(headless=False)
+        print("DEBUG: Browser launched successfully", flush=True)
+
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1280, "height": 800},
         )
+        print("DEBUG: Browser context created", flush=True)
+
         page = context.new_page()
+        print("DEBUG: New page created", flush=True)
 
         page_num = 1
 
         while len(jobs) < max_jobs:
-            # Page 1 has no suffix, page 2+ adds "-2", "-3", etc.
             if page_num == 1:
                 url = f"https://www.naukri.com/{slug}-jobs"
             else:
                 url = f"https://www.naukri.com/{slug}-jobs-{page_num}"
 
-            print(f"Navigating to page {page_num}: {url}")
+            print(f"DEBUG: Navigating to page {page_num}: {url}", flush=True)
             page.goto(url, timeout=60000)
+            print(f"DEBUG: page.goto() completed for page {page_num}", flush=True)
 
             try:
                 page.wait_for_selector("div.cust-job-tuple", timeout=15000)
-            except Exception:
-                print(f"No more job cards found on page {page_num}. Stopping pagination.")
+                print(f"DEBUG: Job cards selector found on page {page_num}", flush=True)
+            except Exception as e:
+                print(f"DEBUG: No more job cards found on page {page_num}. Stopping pagination. Error: {e}", flush=True)
                 break
 
             time.sleep(random.uniform(1, 2))
@@ -60,7 +69,7 @@ def scrape_naukri_jobs(search_query: str, max_jobs: int = 40):
                 time.sleep(random.uniform(0.8, 1.5))
 
             job_cards = page.query_selector_all("div.cust-job-tuple")
-            print(f"Found {len(job_cards)} job cards on page {page_num}")
+            print(f"DEBUG: Found {len(job_cards)} job cards on page {page_num}", flush=True)
 
             if len(job_cards) == 0:
                 break
@@ -86,15 +95,16 @@ def scrape_naukri_jobs(search_query: str, max_jobs: int = 40):
                     jobs.append(job)
 
                 except Exception as e:
-                    print(f"Skipping a job card due to error: {e}")
+                    print(f"DEBUG: Skipping a job card due to error: {e}", flush=True)
                     continue
 
             page_num += 1
-            time.sleep(random.uniform(1, 2))  # polite delay before next page
+            time.sleep(random.uniform(1, 2))
 
+        print("DEBUG: Closing browser", flush=True)
         browser.close()
 
-    print(f"Scraped {len(jobs)} jobs successfully across {page_num} page(s)")
+    print(f"DEBUG: Scraped {len(jobs)} jobs successfully across {page_num} page(s)", flush=True)
     return jobs
 
 
