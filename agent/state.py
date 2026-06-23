@@ -10,6 +10,7 @@ class Job(TypedDict):
     job_url: str
     job_title: str
     company_name: str
+    location: str  
 
     # ---- Scraped Job Details ----
     job_description: str #JD scraped from the page
@@ -38,6 +39,7 @@ class AgentState(TypedDict):
     # ---- Candidate Data (loaded once, shared across all jobs) ----
     resume_text: str
     candidate_skills: List[str]
+    preferred_location: Optional[str]  
 
     # ---- Batch of Jobs ----
     jobs: List[Job]            # All scraped jobs from this run

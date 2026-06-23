@@ -33,6 +33,7 @@ def load_jobs_node(state: AgentState) -> AgentState:
             "job_url": row["job_url"],
             "job_title": row["job_title"],
             "company_name": row["company_name"],
+            "location": row["location"],     
             "job_description": row["job_description"],
             "experience_required": row["experience_required"],
             "required_skills": [],
@@ -67,6 +68,8 @@ You are an AI recruiting assistant helping a candidate evaluate job fit.
 
 CANDIDATE RESUME:
 {resume_text}
+
+CANDIDATE PREFERRED LOCATION: {state.get("preferred_location", "Any")}
 
 JOB TITLE: {current_job['job_title']}
 COMPANY: {current_job['company_name']}
@@ -133,13 +136,13 @@ def apply_node(state: AgentState) -> AgentState:
     """
     current_job = state["jobs"][state["current_index"]]
 
-    print(f"  → Applying to: {current_job['job_title']} @ {current_job['company_name']}")
+    print(f"  → Recommended to apply: {current_job['job_title']} @ {current_job['company_name']}")
 
-    current_job["application_status"] = "applied"
+    current_job["application_status"] = "recommended"
 
     update_application_status(
         job_id=current_job["job_id"],
-        status="applied",
+        status="recommended",
     )
 
     state["jobs"][state["current_index"]] = current_job

@@ -89,27 +89,16 @@ From the dashboard:
 job-application-agent/
 
 ├── agent/
-
 │   ├── state.py            # AgentState + Job type definitions
-
 │   ├── nodes.py             # Graph nodes and routing functions
-
 │   ├── graph.py             # LangGraph StateGraph wiring
-
 │   └── resume_parser.py     # PDF text extraction
-
 ├── scraper/
-
 │   └── scraper.py           # Naukri scraper (Playwright)
-
 ├── database/
-
 │   └── db.py                # SQLite CRUD operations
-
 ├── ui/
-
 │   └── app.py               # Streamlit dashboard
-
 └── main.py                  # CLI entry point
 ---
 

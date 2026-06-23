@@ -73,6 +73,7 @@ def scrape_naukri_jobs(search_query: str, max_jobs: int = 40):
                     company_el = card.query_selector("a.comp-name")
                     exp_el = card.query_selector("span.expwdth")
                     desc_el = card.query_selector("span.job-desc")
+                    location_el = card.query_selector("span.locWdth")
 
                     job = {
                         "job_title": title_el.inner_text().strip() if title_el else "N/A",
@@ -80,6 +81,7 @@ def scrape_naukri_jobs(search_query: str, max_jobs: int = 40):
                         "company_name": company_el.inner_text().strip() if company_el else "N/A",
                         "experience_required": exp_el.inner_text().strip() if exp_el else "N/A",
                         "job_description": desc_el.inner_text().strip() if desc_el else "",
+                        "location": location_el.inner_text().strip() if location_el else "N/A",
                     }
                     jobs.append(job)
 

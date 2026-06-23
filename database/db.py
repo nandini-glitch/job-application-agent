@@ -30,6 +30,7 @@ def init_db():
             company_name TEXT,
             job_description TEXT,
             experience_required TEXT,
+            location TEXT,
             required_skills TEXT,
 
             match_score REAL,
@@ -61,14 +62,15 @@ def insert_jobs(jobs: List[Dict]):
     for job in jobs:
         # Use job_url as a simple unique ID generator
         job_url = job.get("job_url") or ""
-        job_id = job_url.split("-")[-1] if job_url else str(hash(job.get("job_title", "") + job.get("company_name", "")))   
+        job_id = job_url.split("-")[-1] if job_url else str(hash(job.get("job_title", "") + job.get("company_name", "")))
+
         try:
             cursor.execute("""
                 INSERT OR IGNORE INTO jobs (
                     job_id, job_url, job_title, company_name,
-                    job_description, experience_required,
+                    job_description, experience_required, location,
                     application_status, timestamp
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 job_id,
                 job.get("job_url", ""),
@@ -76,6 +78,7 @@ def insert_jobs(jobs: List[Dict]):
                 job.get("company_name", ""),
                 job.get("job_description", ""),
                 job.get("experience_required", ""),
+                job.get("location", ""),
                 "pending",
                 datetime.now().isoformat(),
             ))
