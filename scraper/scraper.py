@@ -54,6 +54,10 @@ def scrape_naukri_jobs(search_query: str, max_jobs: int = 40):
             print(f"DEBUG: Navigating to page {page_num}: {url}", flush=True)
             page.goto(url, timeout=60000)
             print(f"DEBUG: page.goto() completed for page {page_num}", flush=True)
+            print(f"DEBUG: Page title is: {page.title()}", flush=True)
+            page_text_snippet = page.inner_text("body")[:500]
+            print(f"DEBUG: Page body snippet: {page_text_snippet}", flush=True)
+            print(f"DEBUG: page.goto() completed for page {page_num}", flush=True)
 
             try:
                 page.wait_for_selector("div.cust-job-tuple", timeout=15000)
